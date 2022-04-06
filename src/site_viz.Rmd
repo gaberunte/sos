@@ -1,0 +1,148 @@
+---
+title: "Gabe's Vis"
+author: "Gabe Runte"
+date: "4/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(leaflet)
+library(raster)
+library(ggmap)
+library(simplevis)
+library(basemapR)
+
+```
+
+```{r}
+master = read.csv(here("data", "Datasheets_and_Templates - SoilCoreMetadata.csv")) %>% 
+  clean_names() %>% 
+  dplyr::select(1:16)
+cores_long = read_sf(here("data", "kmztoshp","Sedgwick_oaks_20220329-point.shp"))
+cores_long$Name[cores_long$Name=="L23??"] = "L2331"
+cores_long$Name[cores_long$Name=="B2373"] = "B2372"
+
+cores = cores_long %>% 
+  clean_names() %>% 
+  mutate(number = substr(name, 2, 5)) %>% 
+  mutate(number = as.numeric(number)) %>% 
+  filter(number %in% master$tree_id) %>% 
+  rename(tree_id = number)
+
+missing_data = master %>% 
+  filter(tree_id %in% cores$tree_id == FALSE)
+
+samples = master %>% 
+  filter(tree_id %in% missing_data$tree_id == FALSE)
+
+
+
+total = samples %>% 
+  right_join(cores) %>% 
+  mutate(hole = rep(NaN, length(total[1])))
+
+for(i in 1:length(total$hole)) {
+  total$hole[i] = total$geometry[i] + c(0.75/111000*sin(450 - total$heading[i]),0.75/111000*cos(450 - total$heading[i]))
+  
+}
+total = total %>% 
+  dplyr::select(!geometry) %>% 
+  rename(geometry = hole)
+
+total_sf = st_as_sf(total, crs = st_crs("WGS84"))
+
+coordinates = tibble(as.data.frame(st_coordinates(total_sf))) %>% 
+  rename(lat = X) %>% 
+  rename(lng = Y)
+
+total = as.data.frame(total) %>%
+  tibble() %>% 
+  bind_cols(coordinates)
+
+
+
+
+
+
+leaflet(data= total) %>% 
+  addAwesomeMarkers(popup = name) %>% 
+  addProviderTiles("Esri.WorldImagery")
+
+df = st_coordinates(total)
+
+```
+
+
+```{r}
+
+leaflet(data= test) %>% 
+  addCircleMarkers(radius= 3, color = "pink",
+    stroke = FALSE, fillOpacity = 0.75) %>% 
+  addProviderTiles("Esri.WorldImagery")
+
+gg_sf_col(test,
+          col_var = uphill_downhill)
+
+leaf_sf_col(test, 
+               col_method = "quantile",
+               col_cuts = seq(0, 1, 0.25))
+
+test = st_as_sf(total, crs = st_crs("WGS84"))
+
+leaf_sf_col(test, 
+           basemap = map,
+        col_var = unhill_downhill
+        )
+
+gg_sf_col(test,
+          col_var = uphill_downhill) +
+  leaf_basemap(bounds = c(-120.045,34.68940, -120.049,34.69190))
+
+
+map = leaf_basemap(bounds = c(-120.045,34.68940, -120.049,34.69190)) 
+
+ggplot(data = total %>% 
+         filter(soil_pct_moist < 40), aes(x=lat, y=lng)) +
+  geom_point(aes(color = soil_pct_moist, shape = tree_species))+
+  scale_color_gradient2(midpoint = median(total$soil_pct_moist), low = "red", mid = "white",
+                            high = "blue", space = "Lab" ) +
+  theme_dark()
+
+ggplot() +
+  base_map(st_bbox(test), basemap = 'USGS-Topo', increase_zoom = 0,nolabels=TRUE) +
+  geom_point(data = total%>% 
+         filter(soil_pct_moist < 40), aes(x=lat, y=lng,color = soil_pct_moist,size = 3) )+
+  scale_color_gradient2(midpoint = median(total$soil_pct_moist), low = "red", mid = "gray",
+                            high = "blue", space = "Lab" )
+
+```
+
+
+nz_shift = nz_sfc + c(0, 100000)
+
+
+
+
+```{r}
+wideset = total %>% 
+  dplyr::select(tree_id, soil_pct_moist, uphill_downhill) %>% 
+  pivot_wider(names_from = uphill_downhill, values_from = soil_pct_moist)
+
+t.test(wideset$uphill, wideset$downhill,paired = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
