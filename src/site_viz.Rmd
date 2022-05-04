@@ -45,7 +45,7 @@ samples = master %>%
 
 total = samples %>% 
   right_join(cores) %>% 
-  mutate(hole = rep(NaN, length(total[1])))
+  mutate(hole = rep(NaN, length(samples[1])))
 
 for(i in 1:length(total$hole)) {
   total$hole[i] = total$geometry[i] + c(0.75/111000*sin(450 - total$heading[i]),0.75/111000*cos(450 - total$heading[i]))
@@ -71,7 +71,7 @@ total = as.data.frame(total) %>%
 
 
 leaflet(data= total) %>% 
-  addAwesomeMarkers(popup = name) %>% 
+  addAwesomeMarkers() %>% 
   addProviderTiles("Esri.WorldImagery")
 
 df = st_coordinates(total)
@@ -124,7 +124,8 @@ ggplot() +
 ```
 
 
-nz_shift = nz_sfc + c(0, 100000)
+
+
 
 
 
