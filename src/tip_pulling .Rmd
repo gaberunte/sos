@@ -39,3 +39,8 @@ composite = composite.master %>%
 master.joined = left_join(composite, sample, c("old_plate" = "plate_number", "old_column" = "column", "old_row" = "row"))
 ```
 
+```{r}
+not.amplified = master.joined %>% 
+  filter(amplified_y_n == "N")
+```
+
