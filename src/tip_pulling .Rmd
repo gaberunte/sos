@@ -53,6 +53,12 @@ to.sequence = master.joined %>%
   filter(amplified_y_n == "Y")%>%
   mutate(sanger_plate = plate_seq[1:nrow(to.sequence)])%>%
    mutate(sanger_column = column_seq[1:nrow(to.sequence)]) %>% 
-   mutate(sanger_row = row_seq[1:nrow(to.sequence)])
+   mutate(sanger_row = row_seq[1:nrow(to.sequence)]) %>%
+  relocate(sample, 1) 
+
+
+printout.sanger = to.sequence  %>% 
+  select(sample, new_plate_number, new_column, new_row, sanger_plate, sanger_column, sanger_row) %>% 
+  write_csv(here("data", "sanger_plates_05022022.csv"))
 ```
 
