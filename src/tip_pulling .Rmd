@@ -43,12 +43,16 @@ master.joined = left_join(composite, sample, c("old_plate" = "plate_number", "ol
 not.amplified = master.joined %>% 
   filter(amplified_y_n == "N")
 ```
+
 ```{r}
+plate_seq = rep(1:100, each = 96)
+column_seq = rep(rep(1:12, each = 8),100)
+row_seq = rep(rep(letters[1:8], 12), 100)
+
 to.sequence = master.joined %>%
   filter(amplified_y_n == "Y")%>%
-  mutate(sanger_plate = rep(1:2, each=96))%>%
-  mutate(sanger_column = rep(1:12, each=8))%>%
-  vec <- LETTERS[1:8]%>%
-  mutate(sanger_row = rep(vec, each=8))
+  mutate(sanger_plate = plate_seq[1:nrow(to.sequence)])%>%
+   mutate(sanger_column = column_seq[1:nrow(to.sequence)]) %>% 
+   mutate(sanger_row = row_seq[1:nrow(to.sequence)])
 ```
 
