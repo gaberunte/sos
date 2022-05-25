@@ -16,7 +16,7 @@ library(dbplyr)
 
 
 ```{r}
-composite.master = read_csv(here("data", "sos_tippulling_sequencing - composite_locations.csv"))%>%
+composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>%
   clean_names()
 ```
 
@@ -58,7 +58,8 @@ to.sequence = master.joined %>%
 
 
 printout.sanger = to.sequence  %>% 
-  select(sample, new_plate_number, new_column, new_row, sanger_plate, sanger_column, sanger_row) %>% 
+  mutate(newid = paste(sample, old_plate, old_column, old_row, sep = "-")) %>% 
+  select(sample, new_plate_number, new_column, new_row, sanger_plate, sanger_column, sanger_row, newid) %>% 
   write_csv(here("data", "sanger_plates_05022022.csv"))
 ```
 
