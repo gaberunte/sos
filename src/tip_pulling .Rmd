@@ -15,9 +15,11 @@ library(dbplyr)
 ```
 
 
-```{r}
-composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>%
+```{r read in data}
+composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>% # Here I am reading in the locations file
   clean_names()
+
+
 ```
 
 ```{r}
@@ -29,7 +31,7 @@ sample = read_csv(here("data", "sos_tippulling_sequencing - sample_locations.csv
 #left join, rename column and row in composite loc to new column and row. make old locations = to column and row in sample
 
 composite = composite.master %>% 
-  rename(new_column = column, new_row = row, new_plate_number = plate_number) %>% 
+  rename(new_column = column, new_row = row, new_plate_number = plate_number) %>% #changing the name of these columns to new_X instead of their old names in composite.master
   filter(!is.na(old_row)) %>%  
   mutate(old_column = as.numeric(old_column)) %>% 
   mutate(old_plate = as.numeric(old_plate))
