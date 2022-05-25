@@ -17,7 +17,7 @@ library(dbplyr)
 
 ```{r read in data}
 composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>% # Here I am reading in the locations file
-  clean_names()
+  clean_names()# Clean Names changes column titles into a version R can read, basically removes capital letters and spaces, replacing with lower case and underscores respectively
 
 
 ```
