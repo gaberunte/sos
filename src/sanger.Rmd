@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+author: "Gabe Runte"
+date: "5/26/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(phyloseq)
+library(metagenomeSeq)
+library(vegan)
+library(here)
+library(janitor)
+library(gridExtra)
+library(dada2)
+```
+
+
+```{r}
+sos_tips = read_csv(here("data", "sos_tip_sequences - Sheet1.csv")) %>% 
+  clean_names() %>% 
+  mutate(sos_core_id = substr(name, 1, 7)) %>% 
+  mutate(plate_number = substr(name, 9,9))%>% 
+  mutate(column = substr(name, 11,11))%>% 
+  mutate(row = substr(name, 13,13))%>% 
+  mutate(plate_number = as.numeric(plate_number))%>% 
+  mutate(column = as.numeric(column))
+
+  
+master = read.csv(here("data", "Datasheets_and_Templates - SoilCoreMetadata.csv")) %>% 
+  clean_names()
+
+sample_locations = read_csv(here("data", "sos_tippulling_sequencing - sample_locations.csv")) %>% 
+  rename(sos_core_id = sample) %>% 
+  mutate(plate_number = as.numeric(plate_number))%>% 
+  mutate(column = as.numeric(column))
+
+
+sanger_sheet = sos_tips %>% 
+  left_join(sample_locations) %>% 
+  filter(trimmed_seq != "NaN")%>% 
+  filter(str_length(trimmed_seq)>50)
+
+```
+
+```{r, eval = FALSE}
+unite.ref <- "/Users/Gabe/Desktop/phd/ghecto/unite_db/sh_general_release_s_10.05.2021/sh_general_release_dynamic_s_10.05.2021.fasta"
+
+tiptaxa = assignTaxonomy(sanger_sheet$trimmed_seq, unite.ref, multithread = TRUE, tryRC = TRUE)
+
+sos_tiptaxa = tibble(as.data.frame(tiptaxa)) %>% 
+  mutate(trimmed_seq = rownames(tiptaxa))
+
+write_csv(sos_tiptaxa, here("data", "sos_tiptaxa_sanger1.csv"))
+```
+
+```{r}
+ sos_tiptaxa = read_csv(here("data", "sos_tiptaxa_sanger1.csv"))
+
+morph = sanger_sheet %>% 
+               select(trimmed_seq, sos_core_id, plate_number, column, row, morphotype) %>% 
+  left_join(sos_tiptaxa)
+```
+
