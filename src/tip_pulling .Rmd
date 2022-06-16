@@ -15,9 +15,11 @@ library(dbplyr)
 ```
 
 
-```{r}
-composite.master = read_csv(here("data", "sos_tippulling_sequencing - composite_locations.csv"))%>%
-  clean_names()
+```{r read in data}
+composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>% # Here I am reading in the locations file
+  clean_names()# Clean Names changes column titles into a version R can read, basically removes capital letters and spaces, replacing with lower case and underscores respectively
+
+
 ```
 
 ```{r}
@@ -29,7 +31,7 @@ sample = read_csv(here("data", "sos_tippulling_sequencing - sample_locations.csv
 #left join, rename column and row in composite loc to new column and row. make old locations = to column and row in sample
 
 composite = composite.master %>% 
-  rename(new_column = column, new_row = row, new_plate_number = plate_number) %>% 
+  rename(new_column = column, new_row = row, new_plate_number = plate_number) %>% #changing the name of these columns to new_X instead of their old names in composite.master
   filter(!is.na(old_row)) %>%  
   mutate(old_column = as.numeric(old_column)) %>% 
   mutate(old_plate = as.numeric(old_plate))
@@ -58,7 +60,8 @@ to.sequence = master.joined %>%
 
 
 printout.sanger = to.sequence  %>% 
-  select(sample, new_plate_number, new_column, new_row, sanger_plate, sanger_column, sanger_row) %>% 
+  mutate(newid = paste(sample, old_plate, old_column, old_row, sep = "-")) %>% 
+  select(sample, new_plate_number, new_column, new_row, sanger_plate, sanger_column, sanger_row, newid) %>% 
   write_csv(here("data", "sanger_plates_05022022.csv"))
 ```
 

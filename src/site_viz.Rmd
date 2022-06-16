@@ -70,11 +70,6 @@ total = as.data.frame(total) %>%
 
 
 
-leaflet(data= total) %>% 
-  addAwesomeMarkers() %>% 
-  addProviderTiles("Esri.WorldImagery")
-
-df = st_coordinates(total)
 
 ```
 
@@ -123,20 +118,103 @@ ggplot() +
 
 ```
 
+```{r}
+soil_nutes = read_csv(here("data", "soil_nutrients.csv")) %>% 
+  clean_names()%>% 
+  dplyr::select(c(1, 4:28))
+
+soil_cn = read_csv(here("data", "soil_cn.csv")) %>% 
+  clean_names() %>% 
+  dplyr::select(c(1, 4:6))
+
+soil_n = soil_cn %>% 
+ left_join(soil_nutes) %>% 
+  mutate(sample_location = paste(substr(sample_location, 1,5), substr(sample_location, 7,8), sep = "")) %>% 
+  rename(sos_core_id = sample_location)
 
 
+all = test %>% 
+  left_join(soil_n) %>% 
+  print()
+```
 
-
-
+```{r, eval = FALSE}
+for_maggie = all %>% 
+  dplyr::relocate(name, .before = env_weight) %>% 
+  dplyr::select(9:49) %>% 
+  write_csv(here("data", "sedgwick_nutrients.csv"))
+```
 
 
 ```{r}
-wideset = total %>% 
-  dplyr::select(tree_id, soil_pct_moist, uphill_downhill) %>% 
-  pivot_wider(names_from = uphill_downhill, values_from = soil_pct_moist)
+ggplot(all, aes(carbon_percent, nitrogen_percent, color = tree_species)) +
+  geom_point()#+
+  geom_smooth(method='lm') 
+  
+  ggplot(all, aes(tree_species, nitrogen_percent, color = tree_species)) +
+  geom_boxplot()
+  ggplot(all, aes(tree_species, total_exchange_capacity_meq_100_g, color = tree_species)) +
+  geom_boxplot()
+  ggplot(all, aes(tree_species, nitrogen_percent, color = tree_species)) +
+  geom_boxplot()
+  
+  ggplot(all, aes(soil_pct_moist, total_exchange_capacity_meq_100_g, color = tree_species)) +
+  geom_point()#+
+  geom_smooth(method='lm') 
 
-t.test(wideset$uphill, wideset$downhill,paired = TRUE)
+
+ggplot() +
+  base_map(st_bbox(all), basemap = 'USGS-Topo', increase_zoom = 0,nolabels=TRUE) +
+  geom_point(data = all, aes(x=lat, y=lng,color = c_n_ratio,size = 3) )+
+  scale_color_gradient2(midpoint = median(all$c_n_ratio), low = "red", mid = "gray",
+                            high = "blue", space = "Lab" )
 ```
+
+```{r}
+composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>% # Here I am reading in the locations file
+  clean_names() %>% 
+  summarise()
+sample = read_csv(here("data", "sos_tippulling_sequencing - sample_locations.csv"))%>%
+  clean_names()
+
+#left join, rename column and row in composite loc to new column and row. make old locations = to column and row in sample
+
+composite = composite.master %>% 
+  rename(new_column = column, new_row = row, new_plate_number = plate_number) %>% #changing the name of these columns to new_X instead of their old names in composite.master
+  filter(!is.na(old_row)) %>%  
+  mutate(old_column = as.numeric(old_column)) %>% 
+  mutate(old_plate = as.numeric(old_plate))
+
+master.joined = left_join(composite, sample, c("old_plate" = "plate_number", "old_column" = "column", "old_row" = "row"))
+
+count.tips = master.joined %>% 
+  rename(sos_core_id = sample) %>% 
+  group_by(sos_core_id) %>% 
+  summarise(tips_pulled = n())
+
+all.tips = all %>% 
+  left_join(count.tips)
+
+
+ggplot(all.tips, aes(soil_pct_moist, tips_pulled, color = tree_species)) +
+  geom_point()#+
+  geom_smooth(method='lm') 
+
+```
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
