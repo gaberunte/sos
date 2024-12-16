@@ -80,3 +80,28 @@ morph = sanger_sheet %>%
 #write_csv(morph, here("data", "sos_contig_morphotyping1.csv"))
 ```
 
+```{r}
+still_missing = sample_locations %>% 
+  left_join(morph) %>% 
+  filter(morphotype != "x")%>% 
+  filter(morphotype != "BLANK") %>% 
+  filter(is.na(sequence))
+
+missing_but_done = read_csv(here("data", "SOS redone pcr - Sheet1.csv")) %>% 
+  clean_names() %>% 
+  rename(plate_number = old_plate, column = old_column, row = old_row) %>% 
+  select(!4:6) %>% 
+  filter(amlified_y_n == "Y") 
+
+
+missing = still_missing %>% 
+  left_join(missing_but_done)%>% 
+  filter(is.na(amlified_y_n))  %>% 
+  select(1:5)
+
+write.csv(missing, here("data", "reruns_July22.csv"))
+```
+
+
+
+
