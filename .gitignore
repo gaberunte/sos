@@ -20,3 +20,4 @@ illumina/
 # information for Eclipse / Flash Builder.
 .Rproj.user
 
+.DS_Store
