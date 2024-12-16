@@ -15,7 +15,7 @@ library(sf)
 library(leaflet)
 library(raster)
 library(ggmap)
-library(simplevis)
+#library(simplevis)
 library(basemapR)
 
 ```
@@ -75,33 +75,6 @@ total = as.data.frame(total) %>%
 
 
 ```{r}
-
-leaflet(data= test) %>% 
-  addCircleMarkers(radius= 3, color = "pink",
-    stroke = FALSE, fillOpacity = 0.75) %>% 
-  addProviderTiles("Esri.WorldImagery")
-
-gg_sf_col(test,
-          col_var = uphill_downhill)
-
-leaf_sf_col(test, 
-               col_method = "quantile",
-               col_cuts = seq(0, 1, 0.25))
-
-test = st_as_sf(total, crs = st_crs("WGS84"))
-
-leaf_sf_col(test, 
-           basemap = map,
-        col_var = unhill_downhill
-        )
-
-gg_sf_col(test,
-          col_var = uphill_downhill) +
-  leaf_basemap(bounds = c(-120.045,34.68940, -120.049,34.69190))
-
-
-map = leaf_basemap(bounds = c(-120.045,34.68940, -120.049,34.69190)) 
-
 ggplot(data = total %>% 
          filter(soil_pct_moist < 40), aes(x=lat, y=lng)) +
   geom_point(aes(color = soil_pct_moist, shape = tree_species))+
@@ -171,9 +144,8 @@ ggplot() +
 ```
 
 ```{r}
-composite.master = read_csv(here("data", "sos composite locations - Sheet1.csv"))%>% # Here I am reading in the locations file
-  clean_names() %>% 
-  summarise()
+composite.master = read_csv(here("data", "sos_composite_locations.csv"))%>% # Here I am reading in the locations file
+  clean_names() 
 sample = read_csv(here("data", "sos_tippulling_sequencing - sample_locations.csv"))%>%
   clean_names()
 
@@ -202,26 +174,4 @@ ggplot(all.tips, aes(soil_pct_moist, tips_pulled, color = tree_species)) +
 
 ```
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

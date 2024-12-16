@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Bioinformatics pipeline"
 author: "Gabe Runte"
 date: "4/2/2023"
 output: html_document
@@ -176,7 +176,7 @@ head(seq.tab2)
 
 dim(seqtab.nochim)
 #taxa<- read.csv("taxon.csv")
-uniquesToFasta(getUniques(seqtab.nochim), "uniques.fasta", ids=paste0("Seq", seq(length(getUniques(seqtab.nochim)))))
+#uniquesToFasta(getUniques(seqtab.nochim), "uniques.fasta", ids=paste0("Seq", seq(length(getUniques(seqtab.nochim)))))
 ```
 
 ```{r trying to change OTU threshold}
@@ -233,7 +233,7 @@ write.csv(otu.tab, file= here("data", "otu_tab_cleaned.csv"))
 
 ```{r}
 
-unite.ref <- "/Users/Gabe/Desktop/masters/ghecto/data/sh_general_release_all_10.05.2021/sh_general_release_dynamic_all_10.05.2021.fasta"
+unite.ref <- "/local/path/to/reference" #used sh_general_release_all_10.05.2021/sh_general_release_dynamic_all_10.05.2021.fasta
 seqs <- as.vector(clusters$sequence)
 taxa <- assignTaxonomy(seqs, unite.ref, multithread = TRUE, tryRC = TRUE)
 write.csv(taxa, file=here("data", "sos_rnacores.csv") )
